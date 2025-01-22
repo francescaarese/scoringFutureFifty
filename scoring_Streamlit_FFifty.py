@@ -181,13 +181,43 @@ def evaluate_company_growth(row):
 
     
 def score_emerging_and_verticals(company):
-    emerging_space_score = pd.notna(company.get('TAGS')) and bool(company['TAGS'].strip())
+    # Ensure 'TAGS' is treated as a string; handle NaN or non-string values safely
+    tags = str(company.get('TAGS', '')).strip().lower()
+    
+    # Check if 'TAGS' is not empty
+    emerging_space_score = bool(tags)
+    
+    # Define target keywords, normalized to lowercase
     target_keywords = {
-        'artificial intelligence & machine learning', 'robotics & drones', 'cybersecurity',
-        'space technology', 'life sciences', 'health', 'nanotechnology', 'energy'
+        'artificial intelligence & machine learning',
+        'robotics & drones',
+        'cybersecurity',
+        'space technology',
+        'life sciences',
+        'health',
+        'nanotechnology',
+        'quantum computing',
+        'semiconductors',
+        'energy',
+        'security',
+        'robotics',
+        'autonomous & sensor tech',
+        'hardware',
+        'cloud & infrastructure',
+        'big data',
+        'deep tech',
+        'quantum technologies',
+        'biotechnology',
+        'autonomous cars',
+        'space',
+        'energy'
     }
-    verticals = [v.strip().lower() for v in company.get('TAGS', '').split(',')]
+    
+    # Normalize the tags into a list and check for matches
+    verticals = [v.strip() for v in tags.split(',') if v.strip()]
     verticals_score = any(keyword in verticals for keyword in target_keywords)
+    
+    # Assign 10 points if either condition is met
     return 10 if emerging_space_score or verticals_score else 0
 
 
