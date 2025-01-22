@@ -189,14 +189,16 @@ def count_founders_score(company):
     """
     Counts the number of founders and assigns a score:
     - 10 if there are more than 1 founder.
-    - 1 founder gets 0 points.
+    - 0 if there is only 1 founder.
     Assumes 1 founder if the 'FOUNDERS' field is empty or NaN.
     """
     # Ensure the 'FOUNDERS' column is treated as a string to handle NaN or missing values
-    founders = str(company.get('FOUNDERS', '')).strip()
-    if not founders:
-        return 0  # 1 founder, no score
-    num_founders = len([f.strip() for f in founders.split(',') if f.strip()])
+    founders = str(company.get('FOUNDERS', '')).strip()  # Convert to string and strip whitespace
+    if not founders:  # If empty or NaN
+        return 0  # 0 points for 1 assumed founder
+
+    # Split the string by semicolons to count the number of founders
+    num_founders = len([f.strip() for f in founders.split(';') if f.strip()])
     return 10 if num_founders > 1 else 0
 
 # Function to calculate the overall score
