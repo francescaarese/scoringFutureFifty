@@ -16,16 +16,16 @@ st.markdown("""
 5. Download the updated Excel file with scores and see the community metrics (median & average).
 """)
 
-# Function to load Top VCs from a file
+# Load Top VCs from a file
 def load_top_vcs(file_path="VCtop_latest.txt"):
     try:
         with open(file_path, 'r') as file:
-            return {line.strip() for line in file}
+            return {line.strip() for line in file if line.strip()}
     except FileNotFoundError:
         st.error(f"Could not find the Top VCs file at {file_path}. Please ensure the file is available.")
         st.stop()
 
-# Load Top VCs
+# Load the list of Top VCs
 TOP_VCS = load_top_vcs()
 
 # File Upload
@@ -92,9 +92,15 @@ def add_growth_column(df, starting_year):
 
 # Scoring functions
 def score_vc(company):
-    all_investors = set(str(company.get('ALL INVESTORS', '')).split(','))
-    count = sum(vc.strip() in TOP_VCS for vc in all_investors if vc.strip())
-    return 10 if count > 1 else 8 if count == 1 else 0
+    all_investors = str(company.get('ALL INVESTORS', '')).split(';')
+    clean_investors = {investor.strip().lower() for investor in all_investors if investor.strip()}
+    matches = clean_investors.intersection({vc.lower() for vc in TOP_VCS})
+    if len(matches) > 1:
+        return 10
+    elif len(matches) == 1:
+        return 8
+    return 0
+
 
 def score_funding_valuation(company):
     """
