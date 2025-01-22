@@ -264,6 +264,10 @@ def count_founders_score(company):
     num_founders = len([f.strip() for f in founders.split(',') if f.strip()])
     return 10 if num_founders > 1 else 0
 
+
+
+
+
 def calculate_overall_score(row, weights):
     total_score = sum(row[key] * weights[key] for key in weights)
     return total_score
