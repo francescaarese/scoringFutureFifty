@@ -37,6 +37,20 @@ weights = {
     'Founders Is Serial Score': st.sidebar.slider("Founders Is Serial Score Weight", 0.0, 1.0, 0.1, 0.01)
 }
 
+# Function to load Top VCs from a file
+def load_top_vcs(file_path="VCtop_latest.txt"):
+    try:
+        with open(file_path, 'r') as file:
+            return {line.strip() for line in file}
+    except FileNotFoundError:
+        st.error(f"Could not find the Top VCs file at {file_path}. Please ensure the file is available.")
+        st.stop()
+
+# Load Top VCs
+TOP_VCS = load_top_vcs()
+
+
+
 # File uploader
 uploaded_file = st.file_uploader("Upload Company Data Excel File", type=["xlsx"])
 
@@ -159,5 +173,4 @@ if st.button("Process Data"):
         st.download_button("Download Results", output, "company_scores.xlsx", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
     else:
         st.warning("Please upload the company data file.")
-
 
