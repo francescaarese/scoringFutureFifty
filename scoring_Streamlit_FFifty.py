@@ -43,6 +43,8 @@ weights = {
     'HQ City Score': st.sidebar.slider("HQ City Score Weight", 0.0, 1.0, 0.1, 0.01),
     'Founders Genders Score': st.sidebar.slider("Founders Genders Score Weight", 0.0, 1.0, 0.1, 0.01),
     'Founders Is Serial Score': st.sidebar.slider("Founders Is Serial Score Weight", 0.0, 1.0, 0.1, 0.01)
+    'Founders Count Score': st.sidebar.slider("Founders Count Score Weight", 0.0, 1.0, 0.1, 0.01),  
+
 }
 
 # Helper function to parse employee history
@@ -248,6 +250,20 @@ def score_founders_is_serial(company):
             return 10
     return 0
 
+def count_founders_score(company):
+    """
+    Counts the number of founders and assigns a score:
+    - 10 if there are more than 1 founder.
+    - 1 founder gets 0 points.
+    Assumes 1 founder if the 'FOUNDERS' field is empty or NaN.
+    """
+    # Ensure the 'FOUNDERS' column is treated as a string to handle NaN or missing values
+    founders = str(company.get('FOUNDERS', '')).strip()
+    if not founders:
+        return 0  # 1 founder, no score
+    num_founders = len([f.strip() for f in founders.split(',') if f.strip()])
+    return 10 if num_founders > 1 else 0
+
 def calculate_overall_score(row, weights):
     total_score = sum(row[key] * weights[key] for key in weights)
     return total_score
@@ -272,6 +288,7 @@ if st.button("Process Data"):
         df['Emerging and Verticals Score'] = df.apply(score_emerging_and_verticals, axis=1)
         df['Founders Genders Score'] = df.apply(score_founders_genders, axis=1)
         df['Founders Is Serial Score'] = df.apply(score_founders_is_serial, axis=1)
+        df['Founders Score'] = df.apply(count_founders_score, axis=1)
 
         # Calculate overall score
         df['Overall Score'] = df.apply(lambda x: calculate_overall_score(x, weights), axis=1)
