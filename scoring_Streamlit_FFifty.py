@@ -34,7 +34,7 @@ uploaded_file = st.file_uploader("Upload Company Data Excel File", type=["xlsx"]
 # Sidebar for weight adjustments
 st.sidebar.header("Adjust Weights")
 weights = {
-    'VC Score': st.sidebar.slider("VC Score Weight", 0.0, 1.0, 0.15, 0.01),
+    'VC Score': st.sidebar.slider("VC Score Weight", 0.0, 1.0, 0.1, 0.01),
     'Funding Valuation Score': st.sidebar.slider("Funding Valuation Score Weight", 0.0, 1.0, 0.1, 0.01),
     'Raised Score': st.sidebar.slider("Raised Score Weight", 0.0, 1.0, 0.1, 0.01),
     'Recent Financing Score': st.sidebar.slider("Recent Financing Score Weight", 0.0, 1.0, 0.1, 0.01),
@@ -53,7 +53,7 @@ def validate_columns(df, required_columns):
         st.error(f"The following columns are missing in the input file: {', '.join(missing_columns)}")
         st.stop()
 
-# Helper function to parse employee history
+# Function to parse employee history
 def parse_employee_data(row):
     if isinstance(row, str):
         entries = row.split(';')
@@ -83,13 +83,20 @@ def score_vc(company):
 
 def score_funding_valuation(company):
     valuation = pd.to_numeric(company.get('CURRENT COMPANY VALUATION (EUR)', 0), errors='coerce')
-    if pd.isna(valuation): return 0
-    if valuation >= 1000000: return 10
-    elif valuation >= 500000: return 9
-    elif valuation >= 400000: return 8
-    elif valuation > 300000: return 5
-    elif valuation > 200000: return 4
-    elif valuation > 100000: return 3
+    if pd.isna(valuation):
+        return 0
+    if valuation >= 1000000:
+        return 10
+    elif valuation >= 500000:
+        return 9
+    elif valuation >= 400000:
+        return 8
+    elif valuation > 300000:
+        return 5
+    elif valuation > 200000:
+        return 4
+    elif valuation > 100000:
+        return 3
     return 0
 
 def score_raised(company):
@@ -113,49 +120,92 @@ def recent_financing(company):
 
 def score_emerging_and_verticals(company):
     tags = str(company.get('TAGS', '')).strip().lower()
-    target_keywords = {'ai', 'robotics', 'energy', 'biotechnology', 'space'}
-    verticals = [v.strip() for v in tags.split(',')]
-    return 10 if any(keyword in verticals for keyword in target_keywords) else 0
+    emerging_space_score = bool(tags)
+    target_keywords = {
+        'artificial intelligence & machine learning',
+        'robotics & drones',
+        'cybersecurity',
+        'space technology',
+        'life sciences',
+        'health',
+        'nanotechnology',
+        'energy'
+    }
+    verticals = [v.strip().lower() for v in tags.split(',') if v.strip()]
+    verticals_score = any(keyword in verticals for keyword in target_keywords)
+    return 10 if emerging_space_score or verticals_score else 0
+
+def evaluate_company_growth(row):
+    current_year = datetime.now().year
+    years_in_operation = current_year - row['LAUNCH YEAR']
+    growth = row.get('growth to 2024', None)
+    if growth is None or pd.isna(growth):
+        return 0
+    try:
+        growth = float(growth)
+    except ValueError:
+        return 0
+    if years_in_operation >= 4:
+        if growth >= 1000: return 10
+        elif growth > 900: return 9
+        elif growth > 800: return 8
+        elif growth > 700: return 7
+        elif growth > 600: return 6
+        elif growth > 500: return 5
+        elif growth > 400: return 4
+        elif growth > 300: return 3
+        elif growth > 0: return 1
+        else: return 0
+    else:
+        if growth > 200: return 10
+        elif growth > 100: return 6
+        elif growth > 50: return 3
+        else: return 0
 
 def score_hq_city(company):
-    hq_city = company.get('HQ CITY', '').strip().lower()
-    if hq_city in ['oxford', 'cambridge']: return 5
-    elif hq_city != 'london': return 10
+    hq_city = company['HQ CITY'] if 'HQ CITY' in company and pd.notna(company['HQ CITY']) else ''
+    hq_city = hq_city.strip().lower()
+    if hq_city in ['oxford', 'cambridge']:
+        return 5
+    elif hq_city != 'london':
+        return 10
     return 0
 
 def score_founders_genders(company):
     genders = str(company.get('FOUNDERS GENDERS', '')).strip().lower()
-    return 10 if 'female' in genders.split(';') else 0
+    if 'female' in genders.split(';'):
+        return 10
+    return 0
 
 def score_founders_is_serial(company):
     is_serial = company.get('FOUNDERS IS SERIAL', '')
     if isinstance(is_serial, str):
         serial_list = [entry.strip().lower() for entry in is_serial.split(',')]
-        return 10 if 'yes' in serial_list else 0
+        if 'yes' in serial_list:
+            return 10
     return 0
 
 def count_founders_score(company):
     founders = str(company.get('FOUNDERS', '')).strip()
+    if not founders:
+        return 0
     num_founders = len([f.strip() for f in founders.split(',') if f.strip()])
     return 10 if num_founders > 1 else 0
 
 def calculate_overall_score(row, weights):
     return sum(row[key] * weights[key] for key in weights if key in row)
 
-# Processing logic
+# Main Processing
 if st.button("Process Data"):
     if uploaded_file:
         df = pd.read_excel(uploaded_file)
-        
-        # Validate required columns
         required_columns = [
             'ALL INVESTORS', 'CURRENT COMPANY VALUATION (EUR)', 'TOTAL AMOUNT RAISED (EUR)',
-            'DATE', 'TAGS', 'LAUNCH YEAR', 'HQ CITY', 'FOUNDERS GENDERS', 
+            'DATE', 'TAGS', 'LAUNCH YEAR', 'HQ CITY', 'FOUNDERS GENDERS',
             'FOUNDERS IS SERIAL', 'FOUNDERS'
         ]
         validate_columns(df, required_columns)
 
-        # Add growth column
         if 'EMPLOYEES (2016,2017,2018,2019,2020,2021,2022,2023,2024,2025)' in df.columns:
             df = add_growth_column(df, 2024)
         else:
@@ -177,14 +227,17 @@ if st.button("Process Data"):
         # Calculate overall score
         df['Overall Score'] = df.apply(lambda x: calculate_overall_score(x, weights), axis=1)
 
-        # Sort the DataFrame
+        # Sort by 'Overall Score'
         df = df.sort_values(by='Overall Score', ascending=False)
 
-        # Display metrics
-        st.write(f"Median Overall Score: {df['Overall Score'].median():.2f}")
-        st.write(f"Average Overall Score: {df['Overall Score'].mean():.2f}")
+        # Community metrics
+        median_score = df['Overall Score'].median()
+        average_score = df['Overall Score'].mean()
 
-        # Export and download
+        st.write(f"Median Overall Score: {median_score:.2f}")
+        st.write(f"Average Overall Score: {average_score:.2f}")
+
+        # Download updated file
         output = io.BytesIO()
         with pd.ExcelWriter(output, engine='openpyxl') as writer:
             df.to_excel(writer, index=False)
@@ -198,11 +251,4 @@ if st.button("Process Data"):
         )
     else:
         st.warning("Please upload the company data file.")
-
-
-
-
-
-
-
 
