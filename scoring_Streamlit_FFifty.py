@@ -134,23 +134,51 @@ def score_emerging_and_verticals(company):
 def evaluate_company_growth(row):
     current_year = datetime.now().year
     years_in_operation = current_year - row['LAUNCH YEAR']
-    growth = row['growth to 2024']
+
+    # Handle missing or None values in 'growth to 2024'
+    growth = row.get('growth to 2024', None)
+    if growth is None or pd.isna(growth):
+        return 0  # Assign a default score for missing or invalid growth values
+
+    # Ensure growth is a number
+    try:
+        growth = float(growth)
+    except ValueError:
+        return 0  # Assign a default score if growth cannot be converted to a number
+
+    # Companies 4 years or older
     if years_in_operation >= 4:
-        if growth >= 1000: return 10
-        elif growth > 900: return 9
-        elif growth > 800: return 8
-        elif growth > 700: return 7
-        elif growth > 600: return 6
-        elif growth > 500: return 5
-        elif growth > 400: return 4
-        elif growth > 300: return 3
-        elif growth > 0: return 1
-        return 0
+        if growth >= 1000:
+            return 10
+        elif growth > 900:
+            return 9
+        elif growth > 800:
+            return 8
+        elif growth > 700:
+            return 7
+        elif growth > 600:
+            return 6
+        elif growth > 500:
+            return 5
+        elif growth > 400:
+            return 4
+        elif growth > 300:
+            return 3
+        elif growth > 0:
+            return 1
+        else:
+            return 0
     else:
-        if growth > 200: return 10
-        elif growth > 100: return 6
-        elif growth > 50: return 3
-        return 0
+        # Companies younger than 4 years
+        if growth > 200:
+            return 10
+        elif growth > 100:
+            return 6
+        elif growth > 50:
+            return 3
+        else:
+            return 0
+
     
 def score_emerging_and_verticals(company):
     emerging_space_score = pd.notna(company.get('TAGS')) and bool(company['TAGS'].strip())
