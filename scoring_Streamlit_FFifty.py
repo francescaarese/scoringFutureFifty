@@ -186,14 +186,18 @@ def score_founders_is_serial(company):
     return 0
 
 def count_founders_score(company):
-    founders = str(company.get('FOUNDERS', '')).strip()
-    if not founders:
-        return 0
+    """
+    Counts the number of founders and assigns a score:
+    - 10 if there are more than 1 founder.
+    - 0 if there is 1 or no founders.
+    Assumes 1 founder if the 'FOUNDERS' field is empty or NaN.
+    """
+    # Ensure the 'FOUNDERS' column is treated as a string to handle NaN or missing values
+    founders = company.get('FOUNDERS', None)
+    if not isinstance(founders, str) or founders.strip() == '':
+        return 0  # No additional score for missing or 1 assumed founder
     num_founders = len([f.strip() for f in founders.split(',') if f.strip()])
     return 10 if num_founders > 1 else 0
-
-def calculate_overall_score(row, weights):
-    return sum(row[key] * weights[key] for key in weights if key in row)
 
 # Main Processing
 if st.button("Process Data"):
