@@ -82,22 +82,48 @@ def score_vc(company):
     return 10 if count > 1 else 8 if count == 1 else 0
 
 def score_funding_valuation(company):
-    valuation = pd.to_numeric(company.get('CURRENT COMPANY VALUATION (EUR)', 0), errors='coerce')
-    if pd.isna(valuation):
+    """
+    Calculate a score based on the company valuation in EUR.
+    Handles ranges by taking the average of the range.
+    """
+    try:
+        valuation = str(company.get('CURRENT COMPANY VALUATION (EUR)', '')).strip()
+        if '-' in valuation:  # Handle range values
+            low, high = map(lambda x: pd.to_numeric(x.strip(), errors='coerce'), valuation.split('-'))
+            avg_valuation = (low + high) / 2 if pd.notna(low) and pd.notna(high) else None
+        else:
+            avg_valuation = pd.to_numeric(valuation, errors='coerce')
+        
+        if pd.isna(avg_valuation):  # Handle invalid or missing values
+            return 0
+
+        # Determine the score based on the valuation
+        if avg_valuation >= 1000000000:  # 1 billion or more
+            return 10
+        elif avg_valuation >= 500000000:  # 500 million to 1 billion
+            return 9
+        elif avg_valuation >= 300000000:  # 300 million to 500 million
+            return 8
+        elif avg_valuation >= 200000000:  # 200 million to 300 million
+            return 7
+        elif avg_valuation >= 100000000:  # 100 million to 200 million
+            return 6
+        elif avg_valuation >= 50000000:  # 50 million to 100 million
+            return 5
+        elif avg_valuation >= 20000000:  # 20 million to 50 million
+            return 4
+        elif avg_valuation >= 10000000:  # 10 million to 20 million
+            return 3
+        elif avg_valuation >= 5000000:  # 5 million to 10 million
+            return 2
+        elif avg_valuation > 0:  # Less than 5 million
+            return 1
+        else:
+            return 0
+    except Exception as e:
+        st.error(f"Error in score_funding_valuation: {e}")
         return 0
-    if valuation >= 1000000:
-        return 10
-    elif valuation >= 500000:
-        return 9
-    elif valuation >= 400000:
-        return 8
-    elif valuation > 300000:
-        return 5
-    elif valuation > 200000:
-        return 4
-    elif valuation > 100000:
-        return 3
-    return 0
+
 
 def score_raised(company):
     raised = company.get('TOTAL AMOUNT RAISED (EUR)', 0)
