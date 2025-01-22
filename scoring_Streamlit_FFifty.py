@@ -57,15 +57,19 @@ def validate_columns(df, required_columns):
 def parse_employee_data(row):
     if isinstance(row, str):
         entries = row.split(';')
-        return {int(entry.split(':')[0]): int(entry.split(':')[1]) for entry in entries if ': ' in entry}
+        parsed_data = {}
+        for i, entry in enumerate(entries, start=2016):  # Start year is 2016
+            try:
+                value = int(entry.strip()) if entry.strip().lower() != 'n/a' else 0
+                parsed_data[i] = value
+            except ValueError:
+                continue  # Skip invalid entries
+        return parsed_data
     return {}
+
 
 # Function to add 'growth to 2024' column
 def add_growth_column(df, starting_year):
-    """
-    Adds a 'growth to 2024' column to the DataFrame, calculating employee growth
-    over the past 5 years.
-    """
     def calculate_growth(parsed_data, start_year):
         # Ensure parsed data is a dictionary
         if not parsed_data or not isinstance(parsed_data, dict):
@@ -83,6 +87,7 @@ def add_growth_column(df, starting_year):
     df['Parsed Data'] = df['EMPLOYEES (2016,2017,2018,2019,2020,2021,2022,2023,2024,2025)'].apply(parse_employee_data)
     df['growth to 2024'] = df['Parsed Data'].apply(lambda x: calculate_growth(x, starting_year))
     return df
+
 
 
 # Scoring functions
