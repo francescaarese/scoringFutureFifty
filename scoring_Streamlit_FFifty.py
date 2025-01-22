@@ -296,7 +296,7 @@ if st.button("Process Data"):
         df = pd.read_excel(uploaded_file)
          
         # Add growth column
-        if 'Employee History' in df.columns:
+        if 'EMPLOYEES (2016,2017,2018,2019,2020,2021,2022,2023,2024,2025)' in df.columns:
             df = add_growth_column(df,2024)
         else:
             st.error("The input file must contain an 'Employee History' column.")
