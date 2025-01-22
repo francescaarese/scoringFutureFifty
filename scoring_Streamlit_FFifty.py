@@ -104,12 +104,12 @@ def score_funding_valuation(company):
 
 def score_raised(company):
     raised = company.get('TOTAL AMOUNT RAISED (EUR)', 0)
-    if raised >= 100: return 10
-    elif raised > 90: return 8
-    elif raised > 80: return 7
-    elif raised > 50: return 6
-    elif raised > 30: return 5
-    elif raised >= 10: return 4
+    if raised >= 100000000: return 10
+    elif raised > 90000000: return 8
+    elif raised > 80000000: return 7
+    elif raised > 50000000: return 6
+    elif raised > 30000000: return 5
+    elif raised >= 10000000: return 4
     return 0
 
 def recent_financing(company):
@@ -232,11 +232,12 @@ def score_hq_city(company):
     return 0
 
 def score_founders_genders(company):
-    genders = company.get('FOUNDERS GENDERS', '')
-    if isinstance(genders, str):
-        genders_list = [gender.strip().lower() for gender in genders.split(',')]
-        if 'female' in genders_list:
-            return 10
+    # Ensure 'FOUNDERS GENDERS' is treated as a string; handle NaN or non-string values safely
+    genders = str(company.get('FOUNDERS GENDERS', '')).strip().lower()
+    
+    # Check if there is at least one 'female' in the list
+    if 'female' in genders.split(';'):
+        return 10
     return 0
 
 def score_founders_is_serial(company):
