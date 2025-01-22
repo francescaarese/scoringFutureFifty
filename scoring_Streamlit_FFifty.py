@@ -69,6 +69,19 @@ def add_growth_column(df, starting_year):
     df['growth to 2024'] = df['Parsed Data'].apply(lambda x: calculate_growth(x, starting_year))
     return df
 
+
+# Validate required columns at the start
+required_columns = [
+    'ALL INVESTORS', 'CURRENT COMPANY VALUATION (EUR)', 'TOTAL AMOUNT RAISED (EUR)', 
+    'DATE', 'TAGS', 'LAUNCH YEAR', 'HQ CITY', 'FOUNDERS GENDERS', 
+    'FOUNDERS IS SERIAL', 'FOUNDERS'
+]
+missing_columns = [col for col in required_columns if col not in df.columns]
+if missing_columns:
+    st.error(f"The following columns are missing in the input file: {', '.join(missing_columns)}")
+    st.stop()
+
+
 # Scoring functions
 def score_vc(company):
     # Ensure the column is treated as a string and handle NaN or float values
@@ -123,15 +136,6 @@ def recent_financing(company):
     large_financing = company.get('AMOUNT RAISED THIS ROUND (EUR M)', 0) > 20
     return recent_raise + (5 if large_financing else 0)
 
-def score_emerging_and_verticals(company):
-    emerging_space_score = pd.notna(company.get('TAGS')) and bool(company['TAGS'].strip())
-    target_keywords = {
-        'artificial intelligence & machine learning', 'robotics & drones', 'cybersecurity',
-        'space technology', 'life sciences', 'health', 'nanotechnology', 'energy'
-    }
-    verticals = [v.strip().lower() for v in company.get('TAGS', '').split(',')]
-    verticals_score = any(keyword in verticals for keyword in target_keywords)
-    return 10 if emerging_space_score or verticals_score else 0
 
 def evaluate_company_growth(row):
     current_year = datetime.now().year
@@ -218,8 +222,6 @@ def score_emerging_and_verticals(company):
     # Normalize the tags into a list and check for matches
     verticals = [v.strip() for v in tags.split(',') if v.strip()]
     verticals_score = any(keyword in verticals for keyword in target_keywords)
-    
-    # Assign 10 points if either condition is met
     return 10 if emerging_space_score or verticals_score else 0
 
 
