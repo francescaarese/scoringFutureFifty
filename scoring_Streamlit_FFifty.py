@@ -1,3 +1,11 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+Created on Wed Jan 22 11:52:17 2025
+
+@author: francescaareselucini
+"""
+
 import streamlit as st
 import pandas as pd
 from datetime import datetime, timedelta
@@ -173,4 +181,6 @@ if st.button("Process Data"):
         st.download_button("Download Results", output, "company_scores.xlsx", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
     else:
         st.warning("Please upload the company data file.")
+
+
 
