@@ -69,8 +69,10 @@ def add_growth_column(df, starting_year):
 
 # Scoring functions
 def score_vc(company):
-    all_investors = set(company.get('ALL INVESTORS', '').split(','))
-    count = sum(vc.strip() in TOP_VCS for vc in all_investors)
+    # Ensure the column is treated as a string and handle NaN or float values
+    all_investors = set(str(company.get('ALL INVESTORS', '')).split(','))
+    # Remove any extra spaces and count the presence of Top VCs
+    count = sum(vc.strip() in TOP_VCS for vc in all_investors if vc.strip())
     return 10 if count > 1 else 8 if count == 1 else 0
 
 def score_funding_valuation(company):
