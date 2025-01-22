@@ -83,17 +83,17 @@ def score_funding_valuation(company):
         valuation = pd.to_numeric(company.get('CURRENT COMPANY VALUATION (EUR)', 0), errors='coerce')
         if pd.isna(valuation):  # Handle missing or invalid values
             return 0
-        if valuation >= 1000:
+        if valuation >= 1000000:
             return 10
-        elif valuation >= 500:
+        elif valuation >= 500000:
             return 9
-        elif valuation >= 400:
+        elif valuation >= 400000:
             return 8
-        elif valuation > 300:
+        elif valuation > 300000:
             return 5
-        elif valuation > 200:
+        elif valuation > 200000:
             return 4
-        elif valuation > 100:
+        elif valuation > 100000:
             return 3
         else:
             return 0
