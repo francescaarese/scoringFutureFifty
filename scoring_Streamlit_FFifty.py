@@ -199,6 +199,18 @@ def count_founders_score(company):
     num_founders = len([f.strip() for f in founders.split(',') if f.strip()])
     return 10 if num_founders > 1 else 0
 
+# Function to calculate the overall score
+def calculate_overall_score(row, weights):
+    """
+    Calculates the overall score based on individual scores and their weights.
+    """
+    try:
+        total_score = sum(row.get(key, 0) * weights[key] for key in weights if key in row)
+        return total_score
+    except KeyError as e:
+        st.error(f"Missing key in DataFrame: {e}")
+        return 0
+
 
 # Main Processing
 if st.button("Process Data"):
