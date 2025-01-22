@@ -265,12 +265,17 @@ def count_founders_score(company):
     return 10 if num_founders > 1 else 0
 
 
-
-
+# Validate weight keys against DataFrame columns
+missing_weight_keys = [key for key in weights if key not in df.columns]
+if missing_weight_keys:
+    st.error(f"The following keys from weights are missing in the DataFrame: {', '.join(missing_weight_keys)}")
+    st.stop()
 
 def calculate_overall_score(row, weights):
-    total_score = sum(row[key] * weights[key] for key in weights)
+    total_score = sum(row[key] * weights[key] for key in weights if key in row)
     return total_score
+
+
 
 # Integration in Streamlit processing pipeline
 if st.button("Process Data"):
@@ -294,9 +299,17 @@ if st.button("Process Data"):
         df['Founders Is Serial Score'] = df.apply(score_founders_is_serial, axis=1)
         df['Founders Score'] = df.apply(count_founders_score, axis=1)
 
+
+        # Validate weight keys against DataFrame columns
+        missing_weight_keys = [key for key in weights if key not in df.columns]
+        if missing_weight_keys:
+            st.error(f"The following keys from weights are missing in the DataFrame: {', '.join(missing_weight_keys)}")
+            st.stop()
+
         # Calculate overall score
         df['Overall Score'] = df.apply(lambda x: calculate_overall_score(x, weights), axis=1)
 
+    
         # Sort the DataFrame by 'Overall Score' in descending order
         df = df.sort_values(by='Overall Score', ascending=False)
 
