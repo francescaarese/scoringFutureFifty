@@ -192,7 +192,9 @@ def score_emerging_and_verticals(company):
 
 
 def score_hq_city(company):
-    hq_city = company.get('HQ CITY', '').strip().lower()
+    hq_city = company['HQ CITY'] if 'HQ CITY' in company and pd.notna(company['HQ CITY']) else ''
+    hq_city = hq_city.strip().lower()
+
     if hq_city in ['oxford', 'cambridge']:
         return 5
     elif hq_city != 'london':
