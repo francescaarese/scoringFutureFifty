@@ -62,18 +62,28 @@ def parse_employee_data(row):
 
 # Function to add 'growth to 2024' column
 def add_growth_column(df, starting_year):
+    """
+    Adds a 'growth to 2024' column to the DataFrame, calculating employee growth
+    over the past 5 years.
+    """
     def calculate_growth(parsed_data, start_year):
+        # Ensure parsed data is a dictionary
+        if not parsed_data or not isinstance(parsed_data, dict):
+            return None
         years = sorted(parsed_data.keys(), reverse=True)
         recent_years = [year for year in years if year <= start_year][:5]
         if len(recent_years) < 2:
             return None
         first_year = recent_years[-1]
         last_year = recent_years[0]
-        return ((parsed_data[last_year] - parsed_data[first_year]) / parsed_data[first_year]) * 100
-
+        if parsed_data[first_year] == 0:  # Avoid division by zero
+            return None
+        growth = ((parsed_data[last_year] - parsed_data[first_year]) / parsed_data[first_year]) * 100
+        return growth
     df['Parsed Data'] = df['EMPLOYEES (2016,2017,2018,2019,2020,2021,2022,2023,2024,2025)'].apply(parse_employee_data)
     df['growth to 2024'] = df['Parsed Data'].apply(lambda x: calculate_growth(x, starting_year))
     return df
+
 
 # Scoring functions
 def score_vc(company):
@@ -140,9 +150,8 @@ def recent_financing(company):
     last_financing_date = pd.to_datetime(company.get('DATE'), format='%b-%y', errors='coerce')
     recent_raise = 0
     if pd.notna(last_financing_date) and last_financing_date > reference_date - timedelta(days=365):
-        recent_raise = 5
-    large_financing = company.get('AMOUNT RAISED THIS ROUND (EUR M)', 0) > 20
-    return recent_raise + (5 if large_financing else 0)
+        recent_raise = 10
+    return recent_raise
 
 def score_emerging_and_verticals(company):
     tags = str(company.get('TAGS', '')).strip().lower()
@@ -163,30 +172,46 @@ def score_emerging_and_verticals(company):
 
 def evaluate_company_growth(row):
     current_year = datetime.now().year
-    years_in_operation = current_year - row['LAUNCH YEAR']
+    years_in_operation = current_year - row.get('LAUNCH YEAR', current_year)
     growth = row.get('growth to 2024', None)
     if growth is None or pd.isna(growth):
-        return 0
+        return 0  # Default to 0 if growth is missing or invalid
+    # Ensure growth is a float value
     try:
         growth = float(growth)
     except ValueError:
         return 0
-    if years_in_operation >= 4:
-        if growth >= 1000: return 10
-        elif growth > 900: return 9
-        elif growth > 800: return 8
-        elif growth > 700: return 7
-        elif growth > 600: return 6
-        elif growth > 500: return 5
-        elif growth > 400: return 4
-        elif growth > 300: return 3
-        elif growth > 0: return 1
-        else: return 0
-    else:
-        if growth > 200: return 10
-        elif growth > 100: return 6
-        elif growth > 50: return 3
-        else: return 0
+    if years_in_operation >= 4:  # Companies older than 4 years
+        if growth >= 1000:
+            return 10
+        elif growth > 900:
+            return 9
+        elif growth > 800:
+            return 8
+        elif growth > 700:
+            return 7
+        elif growth > 600:
+            return 6
+        elif growth > 500:
+            return 5
+        elif growth > 400:
+            return 4
+        elif growth > 300:
+            return 3
+        elif growth > 0:
+            return 1
+        else:
+            return 0
+    else:  # Companies younger than 4 years
+        if growth > 200:
+            return 10
+        elif growth > 100:
+            return 6
+        elif growth > 50:
+            return 3
+        else:
+            return 0
+
 
 def score_hq_city(company):
     hq_city = company['HQ CITY'] if 'HQ CITY' in company and pd.notna(company['HQ CITY']) else ''
