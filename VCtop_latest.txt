@@ -1,0 +1,190 @@
+2150
+8VC
+A* Capital
+Accel
+ACME Capital
+Advancit Capital
+Advent International
+AENU
+Aglaé Ventures
+Amadeus Capital Partners
+Andreessen Horowitz
+Antler
+Apeiron Investment Group
+Apollo Global Management
+Atlas Impact Partners
+Atomico
+B Capital
+Bain Capital
+Balderton
+Baseline Ventures
+Battery Ventures
+Benchmark
+Bessemer Venture Partners
+Blackstone
+Blossom Capital
+Blue Pool Capital
+BOND
+Canaan Partners
+Cendana Capital
+Cherry Ventures
+Citi Ventures
+Coatue
+Collaborative Fund
+Connect Ventures
+Cota Capital
+Cowboy Ventures
+Creandum
+CRV
+CVC Capital
+Dawn Capital
+Dimension Capital
+Dig Ventures
+DN Capital
+DST Global
+Dynamo Ventures
+Earlybird
+Eight Roads
+Entrée Capital
+Entrepreneur First
+EQT Ventures
+Eurazeo
+Expa
+Fabric Ventures
+Felicis Ventures
+Felix Capital
+ff Venture Capital
+Fifth Wall Ventures
+Fifty Years
+First Mark Capital
+First Round Capital
+FirstMark Capital
+FJ Labs
+Forerunner Ventures
+Founders Fund
+Frontline Ventures
+G9 Ventures
+General Atlantic
+General Catalyst
+Generation Investment Management
+Giant Ventures
+GIC
+Greycroft
+Greylock Partners
+GSR Ventures
+GV
+Headline
+Hedosophia
+Henkel dx Ventures
+Highland Europe
+Hoxton Ventures
+HV Capital
+ICONIQ Capital
+Index Ventures
+Industry Ventures
+Initialized Capital
+Insight Venture Partners
+Intel Capital
+IQ Capital
+J. Rothschild Capital Management
+K5 Global
+Kima Ventures
+Kindred Capital
+Kinnevik
+KKR
+Kleiner Perkins
+L Catterton
+La Famiglia
+Left Lane Capital
+Lendable
+Lerer Hippeau Ventures
+Lightspeed Venture Partners
+LionTree LLC
+LocalGlobe
+Lowercarbon Capital
+Lux Capital
+M12
+M13
+March Capital
+Menlo Ventures
+Microsoft Ventures
+Miroma Group
+Miroma Ventures
+Morphais VC
+Mouro Capital
+Mubadala
+New Enterprise Associates (NEA)
+New Wave
+Next47
+NFX
+Northzone
+Norwest Venture Partners
+Notion Capital
+Novator Partners LLP
+Obvious Ventures
+Octopus Ventures
+One Investment Management
+Pact VC
+Pale Blue Dot
+Partech
+Peak XV Partners
+Pear VC
+Planet A Ventures
+Planet First Partners
+Point Nine Capital
+Presight Capital
+Primary Venture Partners
+Project A Ventures
+Prosus Ventures
+QED
+Redpoint Ventures
+Redstone Capital
+Revolution
+Ribbit Capital
+Riverwood Capital
+RRE
+Salesforce Ventures
+Sapphire Ventures
+Searchlight Capital
+Seedcamp
+Sequoia
+Seraphim Capital
+Shine Capital
+Slow Ventures
+SoftBank Investment Advisers
+SOSV
+Sound Ventures
+Spark Capital
+Speedinvest
+Stride.VC
+Sutter Hill Ventures
+Sweet Capital
+TA Ventures
+Target Global
+TCV
+Teachers' Venture Growth
+TechStars
+Temasek
+Tencent
+The Raine Group
+Thiel Capital
+Third Kind Ventures
+Thrive Capital
+Tiger Global Management
+Torch Capital
+Union Square Ventures
+UTA Ventures
+Valor Equity Partners
+Venrex
+Venrock
+Verlinvest
+Viking Global
+Village Global
+Vision Ridge Partners
+Visionaries Club
+Vitruvian Partners
+Walden Catalyst
+Warburg Pincus
+White Star Capital
+Y Combinator
+ZhenFund
