@@ -280,6 +280,7 @@ def calculate_overall_score(row, weights):
 if st.button("Process Data"):
     if uploaded_file:
         df = pd.read_excel(uploaded_file)
+        df.rename(columns=str.upper)
         required_columns = [
             'ALL INVESTORS', 'CURRENT COMPANY VALUATION (EUR)', 'TOTAL AMOUNT RAISED (EUR)',
             'DATE', 'TAGS', 'LAUNCH YEAR', 'HQ CITY', 'FOUNDERS GENDERS',
