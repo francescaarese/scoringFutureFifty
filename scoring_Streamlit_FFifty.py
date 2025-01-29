@@ -195,18 +195,17 @@ def recent_financing(company):
         if pd.notna(last_financing_date):
             # Check if funding was within the last 12 months
             if last_financing_date > reference_date - timedelta(days=365):
-                recent_raise_score = 5
+                recent_raise_score = 10
 
         # Check amount raised in last round
-        last_round_raised_str = str(company.get('Amount raised this round (EUR M)', '')).strip()
-        if '-' in last_round_raised_str:
-            low, high = map(lambda x: pd.to_numeric(x.strip(), errors='coerce'), last_round_raised_str.split('-'))
-            avg_last_raised = (low + high) / 2 if pd.notna(low) and pd.notna(high) else None
-        else:
-            avg_last_raised = pd.to_numeric(last_round_raised_str, errors='coerce')
-
-        if pd.notna(avg_last_raised) and avg_last_raised >= 20:  # Large recent financing
-            return recent_raise_score
+#       last_round_raised_str = str(company.get('Amount raised this round (EUR M)', '')).strip()
+#       if '-' in last_round_raised_str:
+#          low, high = map(lambda x: pd.to_numeric(x.strip(), errors='coerce'), last_round_raised_str.split('-'))
+#          avg_last_raised = (low + high) / 2 if pd.notna(low) and pd.notna(high) else None
+#      else:
+#          avg_last_raised = pd.to_numeric(last_round_raised_str, errors='coerce')
+#      if pd.notna(avg_last_raised) and avg_last_raised >= 20:  # Large recent financing
+#          return recent_raise_score +5
 
         return recent_raise_score
     except Exception as e:
