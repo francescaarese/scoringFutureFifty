@@ -206,7 +206,7 @@ def recent_financing(company):
             avg_last_raised = pd.to_numeric(last_round_raised_str, errors='coerce')
 
         if pd.notna(avg_last_raised) and avg_last_raised >= 20:  # Large recent financing
-            return recent_raise_score + 5
+            return recent_raise_score
 
         return recent_raise_score
     except Exception as e:
