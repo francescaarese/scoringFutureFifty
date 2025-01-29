@@ -84,7 +84,7 @@ def add_growth_column(df, starting_year):
             return None
         growth = ((parsed_data[last_year] - parsed_data[first_year]) / parsed_data[first_year]) * 100
         return growth
-    df['Parsed Data'] = df['EMPLOYEES (2016,2017,2018,2019,2020,2021,2022,2023,2024,2025)'].apply(parse_employee_data)
+    df['Parsed Data'] = df['Employees (2016,2017,2018,2019,2020,2021,2022,2023,2024,2025)25)'].apply(parse_employee_data)
     df['growth to 2024'] = df['Parsed Data'].apply(lambda x: calculate_growth(x, starting_year))
     return df
 
@@ -92,7 +92,7 @@ def add_growth_column(df, starting_year):
 
 # Scoring functions
 def score_vc(company):
-    all_investors = str(company.get('ALL INVESTORS', '')).split(';')
+    all_investors = str(company.get('Investors names', '')).split(';')
     clean_investors = {investor.strip().lower() for investor in all_investors if investor.strip()}
     matches = clean_investors.intersection({vc.lower() for vc in TOP_VCS})
     if len(matches) > 1:
@@ -108,7 +108,7 @@ def score_funding_valuation(company):
     Handles ranges by taking the average of the range.
     """
     try:
-        valuation = str(company.get('CURRENT COMPANY VALUATION (EUR)', '')).strip()
+        valuation = str(company.get('Valuation (EUR)', '')).strip()
         if '-' in valuation:  # Handle range values
             low, high = map(lambda x: pd.to_numeric(x.strip(), errors='coerce'), valuation.split('-'))
             avg_valuation = (low + high) / 2 if pd.notna(low) and pd.notna(high) else None
@@ -147,7 +147,7 @@ def score_funding_valuation(company):
 
 
 def score_raised(company):
-    raised = company.get('TOTAL AMOUNT RAISED (EUR)', 0)
+    raised = company.get('Total funding (EUR M)', 0)
     if raised >= 100000000: return 10
     elif raised > 90000000: return 8
     elif raised > 80000000: return 7
@@ -158,14 +158,14 @@ def score_raised(company):
 
 def recent_financing(company):
     reference_date = datetime.strptime('Nov-24', '%b-%y')
-    last_financing_date = pd.to_datetime(company.get('DATE'), format='%b-%y', errors='coerce')
+    last_financing_date = pd.to_datetime(company.get('Last funding date'), format='%b-%y', errors='coerce')
     recent_raise = 0
     if pd.notna(last_financing_date) and last_financing_date > reference_date - timedelta(days=365):
         recent_raise = 10
     return recent_raise
 
 def score_emerging_and_verticals(company):
-    tags = str(company.get('TAGS', '')).strip().lower()
+    tags = str(company.get('Tags', '')).strip().lower()
     emerging_space_score = bool(tags)
     target_keywords = {
         'artificial intelligence & machine learning',
@@ -183,7 +183,7 @@ def score_emerging_and_verticals(company):
 
 def evaluate_company_growth(row):
     current_year = datetime.now().year
-    years_in_operation = current_year - row.get('LAUNCH YEAR', current_year)
+    years_in_operation = current_year - row.get('Launch year', current_year)
     growth = row.get('growth to 2024', None)
     if growth is None or pd.isna(growth):
         return 0  # Default to 0 if growth is missing or invalid
@@ -225,7 +225,7 @@ def evaluate_company_growth(row):
 
 
 def score_hq_city(company):
-    hq_city = company['HQ CITY'] if 'HQ CITY' in company and pd.notna(company['HQ CITY']) else ''
+    hq_city = company['HQ city'] if 'HQ city' in company and pd.notna(company['HQ city']) else ''
     hq_city = hq_city.strip().lower()
     if hq_city in ['oxford', 'cambridge']:
         return 5
@@ -234,13 +234,13 @@ def score_hq_city(company):
     return 0
 
 def score_founders_genders(company):
-    genders = str(company.get('FOUNDERS GENDERS', '')).strip().lower()
+    genders = str(company.get('Founders genders', '')).strip().lower()
     if 'female' in genders.split(';'):
         return 10
     return 0
 
 def score_founders_is_serial(company):
-    is_serial = company.get('FOUNDERS IS SERIAL', '')
+    is_serial = company.get('Is serial founder (yes/no)', '')
     if isinstance(is_serial, str):
         serial_list = [entry.strip().lower() for entry in is_serial.split(',')]
         if 'yes' in serial_list:
@@ -252,10 +252,10 @@ def count_founders_score(company):
     Counts the number of founders and assigns a score:
     - 10 if there are more than 1 founder.
     - 0 if there is only 1 founder.
-    Assumes 1 founder if the 'FOUNDERS' field is empty or NaN.
+    Assumes 1 founder if the 'Founders' field is empty or NaN.
     """
-    # Ensure the 'FOUNDERS' column is treated as a string to handle NaN or missing values
-    founders = str(company.get('FOUNDERS', '')).strip()  # Convert to string and strip whitespace
+    # Ensure the 'Founders' column is treated as a string to handle NaN or missing values
+    founders = str(company.get('Founders', '')).strip()  # Convert to string and strip whitespace
     if not founders:  # If empty or NaN
         return 0  # 0 points for 1 assumed founder
 
@@ -280,15 +280,15 @@ def calculate_overall_score(row, weights):
 if st.button("Process Data"):
     if uploaded_file:
         df = pd.read_excel(uploaded_file)
-        df.rename(columns=str.upper)
+       # df.rename(columns=str.upper)
         required_columns = [
-            'ALL INVESTORS', 'CURRENT COMPANY VALUATION (EUR)', 'TOTAL AMOUNT RAISED (EUR)',
-            'DATE', 'TAGS', 'LAUNCH YEAR', 'HQ CITY', 'FOUNDERS GENDERS',
-            'FOUNDERS IS SERIAL', 'FOUNDERS'
+            'Investors names', 'Valuation (EUR)', 'Total funding (EUR M)',
+            'Last funding date', 'Tags', 'Launch year', 'HQ city', 'Founders genders',
+            'Is serial founder (yes/no)', 'Founders'
         ]
         validate_columns(df, required_columns)
 
-        if 'EMPLOYEES (2016,2017,2018,2019,2020,2021,2022,2023,2024,2025)' in df.columns:
+        if 'Employees (2016,2017,2018,2019,2020,2021,2022,2023,2024,2025)' in df.columns:
             df = add_growth_column(df, 2024)
         else:
             st.error("The input file must contain an 'Employee History' column.")
@@ -333,4 +333,3 @@ if st.button("Process Data"):
         )
     else:
         st.warning("Please upload the company data file.")
-
