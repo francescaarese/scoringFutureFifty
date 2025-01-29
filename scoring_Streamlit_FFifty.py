@@ -147,22 +147,89 @@ def score_funding_valuation(company):
 
 
 def score_raised(company):
-    raised = company.get('Total funding (EUR M)', 0)
-    if raised >= 100000000: return 10
-    elif raised > 90000000: return 8
-    elif raised > 80000000: return 7
-    elif raised > 50000000: return 6
-    elif raised > 30000000: return 5
-    elif raised >= 10000000: return 4
-    return 0
+    """
+    Calculates score based on total funding (EUR M). Handles numeric values and ranges.
+    """
+    try:
+        raised_str = str(company.get('Total funding (EUR M)', '')).strip()
+        if '-' in raised_str:  # Handle range values
+            low, high = map(lambda x: pd.to_numeric(x.strip(), errors='coerce'), raised_str.split('-'))
+            avg_raised = (low + high) / 2 if pd.notna(low) and pd.notna(high) else None
+        else:
+            avg_raised = pd.to_numeric(raised_str, errors='coerce')
+        if pd.isna(avg_raised):  # Handle invalid or missing values
+            return 0
+
+        # Scoring logic
+        if avg_raised >= 100:  # 100M+
+            return 10
+        elif avg_raised >= 90:
+            return 8
+        elif avg_raised >= 80:
+            return 7
+        elif avg_raised >= 50:
+            return 6
+        elif avg_raised >= 30:
+            return 5
+        elif avg_raised >= 10:
+            return 4
+        return 0
+    except Exception as e:
+        st.error(f"Error in score_raised: {e}")
+        return 0
+
 
 def recent_financing(company):
-    reference_date = datetime.strptime('Nov-24', '%b-%y')
-    last_financing_date = pd.to_datetime(company.get('Last funding date'), format='%b-%y', errors='coerce')
-    recent_raise = 0
-    if pd.notna(last_financing_date) and last_financing_date > reference_date - timedelta(days=365):
-        recent_raise = 10
-    return recent_raise
+    """
+    Calculates score based on the most recent financing round.
+    - If financing occurred within the last year, assign a score.
+    - Bonus points if the raised amount was significant.
+    """
+    try:
+        reference_date = datetime.today()  # Current date for comparison
+        last_financing_date = pd.to_datetime(company.get('Last funding date', ''), errors='coerce')
+
+        # Default score
+        recent_raise_score = 0
+
+        if pd.notna(last_financing_date):
+            # Check if funding was within the last 12 months
+            if last_financing_date > reference_date - timedelta(days=365):
+                recent_raise_score = 5
+
+        # Check amount raised in last round
+        last_round_raised_str = str(company.get('Amount raised this round (EUR M)', '')).strip()
+        if '-' in last_round_raised_str:
+            low, high = map(lambda x: pd.to_numeric(x.strip(), errors='coerce'), last_round_raised_str.split('-'))
+            avg_last_raised = (low + high) / 2 if pd.notna(low) and pd.notna(high) else None
+        else:
+            avg_last_raised = pd.to_numeric(last_round_raised_str, errors='coerce')
+
+        if pd.notna(avg_last_raised) and avg_last_raised >= 20:  # Large recent financing
+            return recent_raise_score + 5
+
+        return recent_raise_score
+    except Exception as e:
+        st.error(f"Error in recent_financing: {e}")
+        return 0
+
+# def score_raised(company):
+#     raised = company.get('Total funding (EUR M)', 0)
+#     if raised >= 100000000: return 10
+#     elif raised > 90000000: return 8
+#     elif raised > 80000000: return 7
+#     elif raised > 50000000: return 6
+#     elif raised > 30000000: return 5
+#     elif raised >= 10000000: return 4
+#     return 0
+
+# def recent_financing(company):
+#     reference_date = datetime.strptime('Nov-24', '%b-%y')
+#     last_financing_date = pd.to_datetime(company.get('Last funding date'), format='%b-%y', errors='coerce')
+#     recent_raise = 0
+#     if pd.notna(last_financing_date) and last_financing_date > reference_date - timedelta(days=365):
+#         recent_raise = 10
+#     return recent_raise
 
 def score_emerging_and_verticals(company):
     tags = str(company.get('Tags', '')).strip().lower()
