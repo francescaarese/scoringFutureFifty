@@ -84,7 +84,7 @@ def add_growth_column(df, starting_year):
             return None
         growth = ((parsed_data[last_year] - parsed_data[first_year]) / parsed_data[first_year]) * 100
         return growth
-    df['Parsed Data'] = df['Employees (2016,2017,2018,2019,2020,2021,2022,2023,2024,2025)25)'].apply(parse_employee_data)
+    df['Parsed Data'] = df['Employees (2016,2017,2018,2019,2020,2021,2022,2023,2024,2025)'].apply(parse_employee_data)
     df['growth to 2024'] = df['Parsed Data'].apply(lambda x: calculate_growth(x, starting_year))
     return df
 
@@ -280,7 +280,7 @@ def calculate_overall_score(row, weights):
 if st.button("Process Data"):
     if uploaded_file:
         df = pd.read_excel(uploaded_file)
-       # df.rename(columns=str.upper)
+        df.rename(columns=str.upper)
         required_columns = [
             'Investors names', 'Valuation (EUR)', 'Total funding (EUR M)',
             'Last funding date', 'Tags', 'Launch year', 'HQ city', 'Founders genders',
@@ -333,3 +333,4 @@ if st.button("Process Data"):
         )
     else:
         st.warning("Please upload the company data file.")
+        
